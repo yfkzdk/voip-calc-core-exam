@@ -24,6 +24,11 @@ class CountryCode:
 
     _PATTERN = re.compile(r"^\+\d+$")
 
+    _KNOWN_COUNTRY_CODES = frozenset({
+        "+86",
+        "+1",
+    })
+
     _BASE_RATES = {
         "+86": Decimal("0.10"),
         "+1": Decimal("0.05"),
@@ -53,7 +58,7 @@ class CountryCode:
             raise InvalidCountryCodeError(
                 f"Phone number must start with '+': '{phone}'"
             )
-        for code in sorted(cls._BASE_RATES, key=len, reverse=True):
+        for code in sorted(cls._KNOWN_COUNTRY_CODES, key=len, reverse=True):
             if phone.startswith(code):
                 return cls(code)
         match = re.match(r"^\+(\d{2})", phone)
