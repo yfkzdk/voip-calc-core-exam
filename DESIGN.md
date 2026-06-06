@@ -45,7 +45,6 @@ def __post_init__(self):
 | 不变量 | 实施位置 |
 |---|---|
 | 费率 >= 0 | `Money.at_least(Money(0, CNY))` — 最终防线 |
-| 时长 >= 0 | `__post_init__` fail-fast |
 | E.164 格式 | `CountryCode._PATTERN = r"^\+\d+$"` |
 | 时区感知 | `CallContext.__post_init__` tzinfo 非空校验 |
 | 折扣因子 > 0 | 构造函数隐式保证（枚举内定值） |
