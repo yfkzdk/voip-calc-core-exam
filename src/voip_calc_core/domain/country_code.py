@@ -56,7 +56,7 @@ class CountryCode:
         for code in sorted(cls._BASE_RATES, key=len, reverse=True):
             if phone.startswith(code):
                 return cls(code)
-        match = re.match(r"^\+(\d{1,3})", phone)
+        match = re.match(r"^\+(\d{2})", phone)
         if match:
             return cls(f"+{match.group(1)}")
         raise InvalidCountryCodeError(
