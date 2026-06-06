@@ -1,12 +1,12 @@
 """Tests for CallContext value object."""
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from voip_calc_core.domain.call_context import CallContext
 from voip_calc_core.domain.customer_tier import CustomerTier, TierEnum
 
-UTC = timezone.utc
+CST = timezone(timedelta(hours=8))  # China Standard Time
 
 
 class TestCallContextCreation:
@@ -14,7 +14,7 @@ class TestCallContextCreation:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
         assert ctx.caller == "+8613800000001"
@@ -36,7 +36,7 @@ class TestCallContextImmutability:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
         with pytest.raises(Exception):
