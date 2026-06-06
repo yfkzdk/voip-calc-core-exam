@@ -54,4 +54,4 @@ def calculate(self, context: CallContext) -> Money:
 
 - Python 3.9
 - 零外部依赖（仅标准库）
-- 64 个单元测试，0.32s 全绿
+- 68 个单元测试，0.32s 全绿
