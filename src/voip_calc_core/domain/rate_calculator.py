@@ -15,13 +15,13 @@ class RateCalculator:
     Usage::
 
         calculator = RateCalculator()
-        rate = calculator.calculate(context)
+        rate = calculator.calculateRate(context)
     """
 
     def __init__(self, night_valley: Optional[NightValleyDiscount] = None):
         self._night_valley = night_valley or NightValleyDiscount()
 
-    def calculate(self, context: CallContext) -> Money:
+    def calculateRate(self, context: CallContext) -> Money:
         """Return the final per-minute rate for *context*.
 
         Pipeline:

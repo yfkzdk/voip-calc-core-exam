@@ -1,7 +1,7 @@
 """Tests for RateCalculator domain service."""
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from voip_calc_core.domain.call_context import CallContext
@@ -10,7 +10,7 @@ from voip_calc_core.domain.money import Money
 from voip_calc_core.domain.night_valley import NightValleyDiscount
 from voip_calc_core.domain.rate_calculator import RateCalculator
 
-UTC = timezone.utc
+CST = timezone(timedelta(hours=8))  # China Standard Time
 
 
 class TestRateCalculatorDaytime:
@@ -18,7 +18,7 @@ class TestRateCalculatorDaytime:
 
     @pytest.fixture
     def daytime(self):
-        return datetime(2026, 6, 5, 14, 30, 0, tzinfo=UTC)
+        return datetime(2026, 6, 5, 14, 30, 0, tzinfo=CST)
 
     @pytest.fixture
     def calc(self):
@@ -32,7 +32,7 @@ class TestRateCalculatorDaytime:
             call_time=daytime,
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.05"), "CNY")
 
     def test_china_normal_daytime(self, calc, daytime):
@@ -43,7 +43,7 @@ class TestRateCalculatorDaytime:
             call_time=daytime,
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.10"), "CNY")
 
     def test_us_vip_daytime(self, calc, daytime):
@@ -54,7 +54,7 @@ class TestRateCalculatorDaytime:
             call_time=daytime,
             tier=CustomerTier(TierEnum.VIP),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.045"), "CNY")
 
     def test_china_vip_daytime(self, calc, daytime):
@@ -65,7 +65,7 @@ class TestRateCalculatorDaytime:
             call_time=daytime,
             tier=CustomerTier(TierEnum.VIP),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.09"), "CNY")
 
     def test_default_country_normal_daytime(self, calc, daytime):
@@ -76,7 +76,7 @@ class TestRateCalculatorDaytime:
             call_time=daytime,
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.50"), "CNY")
 
 
@@ -85,7 +85,7 @@ class TestRateCalculatorNightValley:
 
     @pytest.fixture
     def night_time(self):
-        return datetime(2026, 6, 6, 2, 0, 0, tzinfo=UTC)
+        return datetime(2026, 6, 6, 2, 0, 0, tzinfo=CST)
 
     @pytest.fixture
     def calc(self):
@@ -99,7 +99,7 @@ class TestRateCalculatorNightValley:
             call_time=night_time,
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.03"), "CNY")
 
     def test_us_vip_night(self, calc, night_time):
@@ -110,7 +110,7 @@ class TestRateCalculatorNightValley:
             call_time=night_time,
             tier=CustomerTier(TierEnum.VIP),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.025"), "CNY")
 
     def test_china_vip_night(self, calc, night_time):
@@ -121,7 +121,7 @@ class TestRateCalculatorNightValley:
             call_time=night_time,
             tier=CustomerTier(TierEnum.VIP),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.07"), "CNY")
 
 
@@ -135,11 +135,11 @@ class TestRateCalculatorFloorAtZero:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 6, 2, 0, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 6, 2, 0, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.VIP),
         )
         calc = RateCalculator(night_valley=aggressive_night)
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.00"), "CNY")
 
     def test_exactly_zero(self):
@@ -149,11 +149,11 @@ class TestRateCalculatorFloorAtZero:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 6, 2, 0, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 6, 2, 0, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.VIP),
         )
         calc = RateCalculator(night_valley=exact_night)
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.00"), "CNY")
 
 
@@ -165,11 +165,11 @@ class TestRateCalculatorImmutability:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+8613900000000",
-            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 14, 30, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.VIP),
         )
-        first = calc.calculate(ctx)
-        second = calc.calculate(ctx)
+        first = calc.calculateRate(ctx)
+        second = calc.calculateRate(ctx)
         assert first == second
         assert first is not second
 
@@ -182,10 +182,10 @@ class TestNightValleyBoundaryHours:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 5, 23, 0, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 23, 0, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.03"), "CNY")
 
     def test_at_05_00_no_night(self):
@@ -193,10 +193,10 @@ class TestNightValleyBoundaryHours:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 5, 5, 0, 0, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 5, 0, 0, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.05"), "CNY")
 
     def test_at_22_59_59_no_night(self):
@@ -204,10 +204,10 @@ class TestNightValleyBoundaryHours:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 5, 22, 59, 59, tzinfo=UTC),
+            call_time=datetime(2026, 6, 5, 22, 59, 59, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.05"), "CNY")
 
     def test_at_04_59_59_applies_night(self):
@@ -215,8 +215,8 @@ class TestNightValleyBoundaryHours:
         ctx = CallContext(
             caller="+8613800000001",
             callee="+14150000000",
-            call_time=datetime(2026, 6, 6, 4, 59, 59, tzinfo=UTC),
+            call_time=datetime(2026, 6, 6, 4, 59, 59, tzinfo=CST),
             tier=CustomerTier(TierEnum.NORMAL),
         )
-        rate = calc.calculate(ctx)
+        rate = calc.calculateRate(ctx)
         assert rate == Money(Decimal("0.03"), "CNY")

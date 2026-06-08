@@ -16,10 +16,10 @@
 
 ### 原生类型迷恋的彻底消灭
 
-核心方法 `calculate()` 的入参和返回值中绝迹 `str`/`float`/`int` 原生类型：
+核心方法 `calculateRate()` 的入参和返回值中绝迹 `str`/`float`/`int` 原生类型：
 
 ```python
-def calculate(self, context: CallContext) -> Money:
+def calculateRate(self, context: CallContext) -> Money:
 ```
 
 所有数值由值对象内部重载运算符承载，调用方无法在外部进行非法的数学运算。
