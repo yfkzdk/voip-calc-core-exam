@@ -24,7 +24,6 @@
 |---|---|
 | `float` 直接构造 Decimal | `__post_init__` 拦截非 Decimal 输入，强制 `Decimal(str(value))` 路径 |
 | `float * Money` 精度污染 | `__mul__` 检测 float 类型后走 `Decimal(str(scalar))`，隔绝二进制近似 |
-| 舍入策略不一致 | 统一 `ROUND_HALF_UP`，仅在最终边界舍入 |
 
 **为什么不用整数（分）**：电信计费中间计算涉及 `0.045 * 1.333...` 这类无限小数，整数截断会在管道中间积累误差。全程 Decimal 延迟到最终舍入是行业标准做法。
 
