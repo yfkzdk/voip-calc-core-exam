@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voip-calc-core-exam"
+version = "1.0.0"
+description = "Cross-border VoIP per-minute rate calculation engine — exam edition"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

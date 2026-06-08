@@ -26,7 +26,6 @@ def calculateRate(self, context: CallContext) -> Money:
 
 ### 冗余上下文的消除
 
-- `Duration.seconds` 而非 `duration_seconds` — 类名已提供充足语义
 - `Money.amount` 而非 `money_amount`
 - 模块级变量 `_BASE_RATES` 而非 `COUNTRY_CODE_BASE_RATES`
 
